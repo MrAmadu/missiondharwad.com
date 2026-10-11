@@ -1,0 +1,672 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5ed">
+  <title>School Register</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3f5ed;
+      --surface: #fffefa;
+      --ink: #18352e;
+      --muted: #718078;
+      --line: #dce3d9;
+      --green: #246c53;
+      --green-soft: #e2eee6;
+      --red: #c64e3d;
+      --yellow: #e7bd58;
+      --blue: #456d83;
+      --shadow: 0 18px 48px rgb(24 53 46 / 9%);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 "Trebuchet MS", "Segoe UI", sans-serif; }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .shell { min-height: 100vh; }
+    .topbar { height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 5vw; border-bottom: 1px solid var(--line); background: rgb(255 254 250 / 82%); }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .02em; }
+    .brand-mark { display: grid; width: 34px; height: 34px; place-items: center; background: var(--green); color: white; border-radius: 9px 9px 9px 2px; font: 19px Georgia, serif; }
+    .primary-nav { display: flex; align-items: center; gap: 5px; height: 100%; }
+    .nav-link { display: inline-flex; align-items: center; height: 38px; padding: 0 13px; border-radius: 5px; color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 700; }
+    .nav-link:hover { color: var(--ink); background: #f1f4ec; }
+    .nav-link[aria-current="page"] { color: var(--green); background: var(--green-soft); }
+    .topmeta { display: flex; align-items: center; gap: 20px; color: var(--muted); font-size: 13px; }
+    .avatar { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: #dbe9e6; color: var(--blue); font-weight: 700; }
+    main { width: min(1200px, 90vw); margin: 0 auto; padding: 42px 0 64px; }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .13em; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin: 7px 0 5px; font: 42px/1.08 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+    .intro { color: var(--muted); margin-bottom: 25px; }
+    .preview { display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; margin: 0 0 25px; background: #fff3d4; border: 1px solid #eedba7; border-radius: 7px; color: #614d1e; font-size: 13px; }
+    .preview strong { color: #503d16; }
+    .preview-icon { flex: 0 0 auto; display: grid; width: 20px; height: 20px; place-items: center; border: 1.5px solid currentColor; border-radius: 50%; font-weight: 700; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); margin-bottom: 26px; }
+    .stat { min-height: 90px; padding: 17px 21px; border-right: 1px solid var(--line); }
+    .stat:last-child { border-right: 0; }
+    .stat-label { display: block; color: var(--muted); font-size: 12px; }
+    .stat-value { display: inline-block; margin-top: 2px; font: 29px/1.2 Georgia, serif; }
+    .stat-note { color: var(--green); margin-left: 8px; font-size: 11px; }
+    .view[hidden] { display: none; }
+    .view.is-entering > * { animation: rise-in .48s cubic-bezier(.2,.7,.2,1) both; }
+    .view.is-entering > *:nth-child(2) { animation-delay: 65ms; }
+    .view.is-entering > *:nth-child(3) { animation-delay: 120ms; }
+    .view.is-entering > *:nth-child(4) { animation-delay: 175ms; }
+    .view.is-entering > *:nth-child(5) { animation-delay: 230ms; }
+    @keyframes rise-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .home-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 25px; }
+    .home-heading h1 { max-width: 650px; }
+    .home-heading .intro { margin-bottom: 0; }
+    .primary-action { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 14px; border: 0; border-radius: 5px; padding: 12px 15px; background: var(--green); color: white; cursor: pointer; font-weight: 700; }
+    .primary-action:hover { background: #19563f; }
+    .primary-action span { font-size: 19px; line-height: 1; }
+    .overview-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 36px; margin-top: 32px; }
+    .overview-section { border-top: 1px solid var(--line); padding-top: 17px; }
+    .overview-section h2 { margin-bottom: 5px; font: 23px Georgia, serif; }
+    .section-note { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+    .region-list, .recent-list { display: grid; }
+    .region-link, .recent-link { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 16px; border: 0; border-top: 1px solid #e5eae2; padding: 11px 2px; background: transparent; text-align: left; cursor: pointer; }
+    .region-link:hover .region-name, .recent-link:hover .recent-name { color: var(--green); }
+    .region-name, .recent-name { font-size: 13px; font-weight: 700; }
+    .region-count, .recent-location { color: var(--muted); font-size: 12px; }
+    .region-arrow { color: var(--green); font-size: 18px; }
+    .recent-link { justify-content: flex-start; }
+    .recent-index { display: grid; flex: 0 0 32px; width: 32px; height: 32px; place-items: center; border-radius: 50%; background: #e6ede6; color: var(--green); font: 14px Georgia, serif; }
+    .recent-copy { display: grid; gap: 1px; }
+    .directory-heading { margin-bottom: 23px; }
+    .updates-heading { margin-bottom: 24px; }
+    .updates-heading h1 { margin-bottom: 8px; }
+    .updates-tools { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .post-filters { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+    .post-filter { border: 0; border-radius: 4px; padding: 7px 11px; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .post-filter[aria-pressed="true"] { background: var(--green-soft); color: var(--green); }
+    .post-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .post-action { border: 1px solid var(--line); border-radius: 5px; padding: 8px 11px; background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 700; }
+    .post-action:hover { border-color: var(--green); color: var(--green); }
+    .post-action.primary { border-color: var(--green); background: var(--green); color: white; }
+    .post-feed { display: grid; }
+    .post-item { display: grid; grid-template-columns: minmax(150px, 230px) minmax(0, 1fr); gap: 23px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+    .post-item:not(.has-image) { grid-template-columns: minmax(0, 1fr); }
+    .post-image { display: block; width: 100%; aspect-ratio: 4 / 3; border-radius: 5px; background: #e6ede6; object-fit: cover; }
+    .post-content { min-width: 0; }
+    .post-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 7px; color: var(--muted); font-size: 11px; }
+    .post-kind { color: var(--green); font-weight: 700; text-transform: uppercase; }
+    .post-title { margin: 0 0 4px; font: 25px/1.15 Georgia, "Times New Roman", serif; }
+    .post-school { margin-bottom: 10px; color: var(--muted); font-size: 12px; }
+    .post-body { margin-bottom: 12px; color: #4e6056; font-size: 13px; white-space: pre-line; overflow-wrap: anywhere; }
+    .post-remove { border: 0; padding: 3px 0; background: transparent; color: #9b5348; cursor: pointer; font-size: 12px; }
+    .post-empty { padding: 38px 12px; color: var(--muted); text-align: center; }
+    .post-empty strong { display: block; margin-bottom: 5px; color: var(--ink); font: 21px Georgia, serif; }
+    .updates-notice { margin-top: 18px; color: var(--muted); font-size: 12px; }
+    dialog.post-dialog { width: min(600px, calc(100vw - 32px)); max-height: min(90dvh, 860px); overflow-y: auto; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+    dialog.post-dialog::backdrop { background: rgb(18 36 31 / 45%); backdrop-filter: blur(2px); }
+    .post-form { padding: 24px; }
+    .post-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 21px; }
+    .post-dialog-head h2 { margin: 4px 0 0; font: 27px Georgia, serif; }
+    .dialog-close { flex: 0 0 auto; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; font-size: 21px; }
+    .dialog-close:hover { background: #edf1e9; }
+    .post-fields { display: grid; gap: 14px; }
+    .post-field { display: grid; gap: 5px; color: #53645a; font-size: 12px; font-weight: 700; }
+    .post-field input, .post-field select, .post-field textarea { width: 100%; min-height: 40px; max-width: none; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--ink); font-weight: 400; }
+    .post-field textarea { min-height: 115px; resize: vertical; }
+    .post-field input:focus, .post-field select:focus, .post-field textarea:focus { outline: 2px solid rgb(36 108 83 / 18%); border-color: var(--green); }
+    .post-field input[type="file"] { min-height: auto; padding: 8px; }
+    .post-help { color: var(--muted); font-size: 11px; font-weight: 400; }
+    .post-image-preview { display: block; width: min(100%, 300px); max-height: 190px; margin-top: 8px; border-radius: 4px; object-fit: cover; }
+    .post-form-message { min-height: 18px; margin: 0; color: #a33e32; font-size: 12px; }
+    .post-form-actions { display: flex; justify-content: flex-end; gap: 9px; padding-top: 5px; }
+    .post-form-actions button { min-height: 39px; border: 1px solid var(--line); border-radius: 5px; padding: 0 13px; background: white; cursor: pointer; font-weight: 700; }
+    .post-form-actions .save-post { border-color: var(--green); background: var(--green); color: white; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .toolbar h2 { margin: 0; font: 24px Georgia, serif; }
+    .actions { display: flex; gap: 9px; }
+    .search-wrap { position: relative; }
+    .search-icon { position: absolute; left: 12px; top: 9px; color: #839088; }
+    .search { width: min(285px, 33vw); height: 39px; padding: 0 12px 0 36px; border: 1px solid var(--line); border-radius: 5px; outline: none; background: var(--surface); color: var(--ink); }
+    .search:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgb(36 108 83 / 12%); }
+    select { height: 39px; max-width: 170px; padding: 0 32px 0 11px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface); color: var(--ink); }
+    .table-wrap { overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 12px 16px; background: #f8f9f4; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    td { padding: 13px 16px; border-top: 1px solid #e9ede6; font-size: 13px; }
+    tbody tr { cursor: pointer; transition: background .15s ease; }
+    tbody tr:hover { background: #f5f8f1; }
+    .school-name { font-weight: 700; }
+    .school-id { display: block; margin-top: 1px; color: #87928b; font-size: 11px; font-weight: 400; }
+    .village { color: #56665e; }
+    .count { font-variant-numeric: tabular-nums; }
+    .status { display: inline-flex; align-items: center; gap: 6px; color: var(--green); font-size: 12px; }
+    .status::before { width: 7px; height: 7px; border-radius: 50%; background: #54a978; content: ""; }
+    .row-arrow { color: #87928b; font-size: 18px; }
+    .table-footer { display: flex; justify-content: space-between; padding: 12px 15px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .empty { padding: 30px; text-align: center; color: var(--muted); }
+    .detail-backdrop { position: fixed; inset: 0; z-index: 5; background: rgb(18 36 31 / 32%); opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .detail-panel { position: fixed; z-index: 6; top: 0; right: 0; width: min(540px, 100vw); height: 100dvh; overflow-y: auto; padding: 29px 32px; background: var(--surface); box-shadow: var(--shadow); transform: translateX(102%); transition: transform .25s ease; }
+    .detail-open .detail-backdrop { opacity: 1; pointer-events: auto; }
+    .detail-open .detail-panel { transform: translateX(0); }
+    .detail-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; }
+    .detail-actions { display: flex; align-items: center; gap: 13px; }
+    .back-button, .close-button { display: inline-flex; align-items: center; gap: 7px; border: 0; padding: 6px 0; background: transparent; color: var(--green); cursor: pointer; font-weight: 700; }
+    .edit-button, .save-button { border: 0; border-radius: 5px; padding: 9px 13px; background: var(--green); color: white; cursor: pointer; font-size: 13px; font-weight: 700; }
+    .edit-button:hover, .save-button:hover { background: #19563f; }
+    .edit-form { display: grid; gap: 14px; }
+    .edit-form label { display: grid; gap: 5px; color: var(--muted); font-size: 12px; }
+    .edit-form input, .edit-form textarea { width: 100%; min-height: 39px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--ink); }
+    .edit-form textarea { min-height: 82px; resize: vertical; }
+    .edit-form input:focus, .edit-form textarea:focus { outline: 2px solid rgb(36 108 83 / 22%); border-color: var(--green); }
+    .close-button { width: 34px; height: 34px; justify-content: center; border-radius: 50%; color: var(--muted); font-size: 22px; }
+    .close-button:hover { background: #edf1e9; }
+    .detail-title { margin: 9px 0 7px; font: 36px/1.08 Georgia, serif; }
+    .detail-location { margin-bottom: 22px; color: var(--muted); }
+    .detail-badges { display: flex; gap: 8px; margin-bottom: 30px; }
+    .badge { padding: 5px 9px; border-radius: 4px; background: var(--green-soft); color: var(--green); font-size: 11px; font-weight: 700; }
+    .badge.alt { background: #e7eef3; color: var(--blue); }
+    .detail-section { padding: 20px 0; border-top: 1px solid var(--line); }
+    .detail-section h3 { margin-bottom: 13px; font-size: 11px; letter-spacing: .11em; text-transform: uppercase; color: var(--muted); }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 22px; }
+    .field-label { display: block; margin-bottom: 3px; color: var(--muted); font-size: 11px; }
+    .field-value { font-size: 14px; font-weight: 600; }
+    .detail-note { color: #58675f; font-size: 13px; }
+    .detail-disclaimer { margin-top: 23px; padding: 12px 13px; background: #fff3d4; border-radius: 5px; color: #614d1e; font-size: 12px; }
+    @media (max-width: 760px) {
+      main { width: min(100% - 32px, 600px); padding-top: 29px; }
+      .topbar { height: auto; min-height: 62px; flex-wrap: wrap; gap: 7px 12px; padding: 9px 16px; }
+      .brand { gap: 8px; font-size: 13px; }
+      .brand-mark { width: 30px; height: 30px; font-size: 15px; }
+      .primary-nav { order: 3; width: 100%; height: 37px; border-top: 1px solid var(--line); }
+      .nav-link { height: 32px; padding: 0 10px; }
+      .topmeta .workspace-label { display: none; }
+      h1 { font-size: 35px; }
+      .home-heading { align-items: flex-start; flex-direction: column; gap: 17px; }
+      .overview-grid { grid-template-columns: 1fr; gap: 25px; margin-top: 25px; }
+      .updates-tools { align-items: flex-start; flex-direction: column; }
+      .post-filters { width: 100%; justify-content: space-between; }
+      .post-filter { padding: 7px 9px; }
+      .post-actions { width: 100%; }
+      .post-item, .post-item.has-image { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .post-image { aspect-ratio: 16 / 9; }
+      .post-form { padding: 19px; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .stat { min-height: 78px; padding: 13px 10px; }
+      .stat-value { font-size: 25px; }
+      .stat-note { display: block; margin: 0; font-size: 10px; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .actions { width: 100%; }
+      .search-wrap { flex: 1; }
+      .search { width: 100%; }
+      select { max-width: 145px; }
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 620px; }
+      .detail-panel { padding: 22px 21px; }
+      .detail-title { font-size: 31px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">SR</span><span>School Register</span></div>
+      <nav class="primary-nav" aria-label="Main navigation"><a class="nav-link" href="#home" data-view="home" aria-current="page">Home</a><a class="nav-link" href="#schools" data-view="schools">Schools</a><a class="nav-link" href="#updates" data-view="updates">Updates</a></nav>
+      <div class="topmeta"><span class="workspace-label">School network directory</span><span class="avatar" aria-label="Preview account">P</span></div>
+    </header>
+    <main>
+      <section class="view is-entering" id="home-view" aria-labelledby="home-title">
+        <div class="home-heading">
+          <div><div class="eyebrow">School network · overview</div><h1 id="home-title">A clear view of every school.</h1><p class="intro">Your schools, communities, and enrollment at a glance.</p></div>
+          <button class="primary-action" id="browse-schools" type="button">Browse schools <span aria-hidden="true">→</span></button>
+        </div>
+        <aside class="preview" role="note"><span class="preview-icon" aria-hidden="true">!</span><span><strong>Preview data only.</strong> This prototype has no sign-in or school-level access controls. Do not enter real school or personal information.</span></aside>
+        <section class="stats" aria-label="School network summary">
+          <div class="stat"><span class="stat-label">Schools in register</span><span class="stat-value" id="school-total">40</span><span class="stat-note">across 5 regions</span></div>
+          <div class="stat"><span class="stat-label">Students enrolled</span><span class="stat-value" id="student-total">0</span><span class="stat-note">sample total</span></div>
+          <div class="stat"><span class="stat-label">Staff members</span><span class="stat-value" id="staff-total">0</span><span class="stat-note">sample total</span></div>
+        </section>
+        <div class="overview-grid">
+          <section class="overview-section" aria-labelledby="regions-title"><h2 id="regions-title">Schools by region</h2><p class="section-note">Choose a region to narrow the directory.</p><div class="region-list" id="region-list"></div></section>
+          <section class="overview-section" aria-labelledby="recent-title"><h2 id="recent-title">School directory</h2><p class="section-note">Open a school record or browse the full register.</p><div class="recent-list" id="recent-list"></div></section>
+        </div>
+      </section>
+      <section class="view" id="schools-view" aria-labelledby="directory-title" hidden>
+        <div class="directory-heading"><div class="eyebrow">School network · directory</div><h1 id="directory-title">All schools</h1><p class="intro">Search the register by school, village, or region.</p></div>
+        <aside class="preview" role="note"><span class="preview-icon" aria-hidden="true">!</span><span><strong>Preview data only.</strong> This prototype has no sign-in or school-level access controls. Do not enter real school or personal information.</span></aside>
+        <div class="toolbar">
+          <h2>School register <span id="result-count" style="color:var(--muted);font:13px 'Trebuchet MS',sans-serif"></span></h2>
+          <div class="actions">
+            <label class="search-wrap"><span class="search-icon" aria-hidden="true">⌕</span><input id="search" class="search" type="search" placeholder="Find a school or village" aria-label="Search schools"></label>
+            <select id="region-filter" aria-label="Filter by region"><option value="">All regions</option></select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">School</th><th scope="col">Village</th><th scope="col">Region</th><th scope="col">Students</th><th scope="col">Status</th><th aria-label="Open details"></th></tr></thead>
+            <tbody id="school-rows"></tbody>
+          </table>
+          <div class="empty" id="empty-state" hidden>No schools match that search. Try a different name or region.</div>
+          <div class="table-footer"><span id="footer-count">Showing 40 schools</span><span>Updated 4 October 2026</span></div>
+        </div>
+      </section>
+      <section class="view" id="updates-view" aria-labelledby="updates-title" hidden>
+        <div class="updates-heading"><div class="eyebrow">School network · community</div><h1 id="updates-title">Stories & events</h1><p class="intro">Share school milestones, gatherings, and moments from the community.</p></div>
+        <aside class="preview" role="note"><span class="preview-icon" aria-hidden="true">!</span><span><strong>Local preview only.</strong> Posts and resized images are saved in this browser, not shared with other people. Use fictional details and do not upload sensitive images.</span></aside>
+        <div class="updates-tools">
+          <div class="post-filters" role="group" aria-label="Filter updates"><button class="post-filter" type="button" data-filter="all" aria-pressed="true">All</button><button class="post-filter" type="button" data-filter="event" aria-pressed="false">Events</button><button class="post-filter" type="button" data-filter="article" aria-pressed="false">Articles</button><button class="post-filter" type="button" data-filter="photo" aria-pressed="false">Photos</button></div>
+          <div class="post-actions"><button class="post-action" type="button" data-create-post="event">+ Event</button><button class="post-action" type="button" data-create-post="photo">+ Photos</button><button class="post-action primary" type="button" data-create-post="article">+ Article</button></div>
+        </div>
+        <p class="updates-notice" id="posts-status" role="status">Updates you add will appear here.</p>
+        <div class="post-feed" id="post-feed" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+  <div class="detail-backdrop" id="backdrop" aria-hidden="true"></div>
+  <aside class="detail-panel" id="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detail-name" aria-hidden="true">
+    <div class="detail-head"><button class="back-button" id="back-button" type="button"><span aria-hidden="true">←</span> Directory</button><div class="detail-actions"><button class="edit-button" id="edit-button" type="button">Edit sample</button><button class="close-button" id="close-button" type="button" aria-label="Close school details">×</button></div></div>
+    <div id="detail-content"></div>
+  </aside>
+  <dialog class="post-dialog" id="post-dialog" aria-labelledby="post-dialog-title">
+    <form class="post-form" id="post-form">
+      <div class="post-dialog-head"><div><div class="eyebrow">School network · new post</div><h2 id="post-dialog-title">Add an update</h2></div><button class="dialog-close" id="dismiss-post" type="button" aria-label="Close form">×</button></div>
+      <div class="post-fields">
+        <input type="hidden" name="type" id="post-type">
+        <label class="post-field"><span id="post-title-label">Title</span><input name="title" id="post-title" maxlength="120" required></label>
+        <label class="post-field">School<select name="schoolId" id="post-school"></select></label>
+        <label class="post-field"><span id="post-date-label">Date</span><input name="date" id="post-date" type="date" required></label>
+        <label class="post-field"><span id="post-body-label">Details</span><textarea name="body" id="post-body" maxlength="5000"></textarea></label>
+        <label class="post-field"><span>Image (optional)</span><input name="image" id="post-image" type="file" accept="image/jpeg,image/png,image/webp"><span class="post-help">JPEG, PNG, or WebP. Images are resized before being stored in this browser.</span><img class="post-image-preview" id="post-image-preview" alt="Selected image preview" hidden></label>
+        <p class="post-form-message" id="post-form-message" role="alert"></p>
+        <div class="post-form-actions"><button id="cancel-post" type="button">Cancel</button><button class="save-post" id="save-post" type="submit">Publish</button></div>
+      </div>
+    </form>
+  </dialog>
+  <script>
+    const seedSchools = [
+      ["Al Noor Islamic Academy", "Baitul Aman", "North Valley"], ["Darul Huda School", "Chandipur", "North Valley"],
+      ["Al Falah Girls' School", "Shantiganj", "North Valley"], ["Markazul Uloom", "Kashipur", "North Valley"],
+      ["Anwarul Quran Institute", "Sonapur", "North Valley"], ["Rahmaniya Senior School", "Jamalpur", "North Valley"],
+      ["Ihsan Academy", "Boro Bazar", "North Valley"], ["Ayesha Siddiqua Academy", "Lakshmipur", "North Valley"],
+      ["Furqania Learning Centre", "Uttarpara", "River District"], ["Darussalam School", "Mirzapur", "River District"],
+      ["Al Ikhlas Academy", "Char Kaliganj", "River District"], ["Sirajul Uloom", "Madhabpur", "River District"],
+      ["Talimul Quran School", "Nawabganj", "River District"], ["Badrul Huda Institute", "Kanchanpur", "River District"],
+      ["Jamia Rahmania", "Fakirhat", "River District"], ["Al Amin Children's School", "South Para", "River District"],
+      ["Iqra Model School", "Khilgaon", "East Ridge"], ["Nurul Islam Academy", "Rupganj", "East Ridge"],
+      ["Miftahul Jannah Girls' School", "Bashgram", "East Ridge"], ["Hafizia Darul Quran", "Kamalpur", "East Ridge"],
+      ["Al Baraka School", "Munshiganj", "East Ridge"], ["Usmania Islamic School", "Chowdhuryhat", "East Ridge"],
+      ["Fazlul Karim Academy", "Hossainpur", "East Ridge"], ["Safa Marwa Institute", "Kalabagan", "East Ridge"],
+      ["Tanzimul Ummah School", "Pathorghata", "South Fields"], ["Al Bashir Academy", "Dighalia", "South Fields"],
+      ["Siddiqia Learning Centre", "Koyra", "South Fields"], ["Tayyibah Academy", "Baniarchar", "South Fields"],
+      ["As Sunnah Institute", "Gopalpur", "South Fields"], ["Jamiatul Muminin", "Bhurungamari", "South Fields"],
+      ["Al Qalam Academy", "Dakkhinpara", "South Fields"], ["Nizamia Hifz Centre", "Chitalmari", "South Fields"],
+      ["Ummul Qura School", "Baniachong", "West Garden"], ["Salahuddin Islamic Academy", "Kulaura", "West Garden"],
+      ["Darul Ma'arif School", "Sreemangal", "West Garden"], ["Abu Bakr Siddique Institute", "Fenchuganj", "West Garden"],
+      ["Khadija Khatun Academy", "Beanibazar", "West Garden"], ["Al Hidayah School", "Juri", "West Garden"],
+      ["Madinatul Uloom", "Bishwanath", "West Garden"], ["Sirat-e-Mustaqim School", "Golapganj", "West Garden"]
+    ];
+    const givenNames = ["Abdul Karim", "Mariam Begum", "Abu Taher", "Fatema Akter", "Yusuf Ali", "Amina Khatun", "Mahmud Hasan", "Rokeya Sultana"];
+    const regions = [...new Set(seedSchools.map((school) => school[2]))];
+    const schools = seedSchools.map(([name, village, region], index) => ({
+      id: `MR-${String(index + 1).padStart(3, "0")}`,
+      name, village, region,
+      students: 82 + ((index * 47 + 35) % 390),
+      staff: 8 + ((index * 5 + 3) % 19),
+      leader: givenNames[index % givenNames.length],
+      role: index % 2 === 0 ? "Principal" : "Head teacher",
+      phone: `+880 17${String(10000000 + index * 13791).slice(-8)}`,
+      email: `office${index + 1}@example.org`,
+      founded: 1988 + ((index * 7) % 34),
+      note: ["Library reading room renovated this year.", "Community committee meets each month.", "New classroom block planned for next term.", "Weekend learning circle open to the village."][index % 4]
+    }));
+    const formatNumber = (number) => new Intl.NumberFormat("en").format(number);
+    const regionFilter = document.getElementById("region-filter");
+    const rows = document.getElementById("school-rows");
+    const search = document.getElementById("search");
+    const panel = document.getElementById("detail-panel");
+    const content = document.getElementById("detail-content");
+    const homeView = document.getElementById("home-view");
+    const schoolsView = document.getElementById("schools-view");
+    const updatesView = document.getElementById("updates-view");
+    const regionList = document.getElementById("region-list");
+    const recentList = document.getElementById("recent-list");
+    const postFeed = document.getElementById("post-feed");
+    const postDialog = document.getElementById("post-dialog");
+    const postForm = document.getElementById("post-form");
+    const postSchool = document.getElementById("post-school");
+    const postImage = document.getElementById("post-image");
+    const postImagePreview = document.getElementById("post-image-preview");
+    const postsStatus = document.getElementById("posts-status");
+    const postsStorageKey = "school-register-updates-v1";
+    let posts = [];
+    let activePostFilter = "all";
+    let imagePreviewUrl = "";
+    let activeView = "home";
+    let currentSchoolId = "";
+    const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[character]);
+    regions.forEach((region) => regionFilter.add(new Option(region, region)));
+    postSchool.add(new Option("School network", "network"));
+    schools.forEach((school) => postSchool.add(new Option(school.name, school.id)));
+
+    function loadPosts() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(postsStorageKey) || "[]");
+        if (!Array.isArray(stored)) return;
+        posts = stored.filter((post) => post && typeof post.id === "string" && ["event", "article", "photo"].includes(post.type) && typeof post.title === "string" && typeof post.body === "string" && typeof post.date === "string").map((post) => ({
+          id: post.id,
+          type: post.type,
+          title: post.title.slice(0, 120),
+          schoolId: typeof post.schoolId === "string" ? post.schoolId : "network",
+          date: post.date,
+          body: post.body.slice(0, 5000),
+          image: typeof post.image === "string" && post.image.startsWith("data:image/jpeg;base64,") ? post.image : "",
+          createdAt: Number(post.createdAt) || 0
+        }));
+      } catch {
+        postsStatus.textContent = "Browser storage is unavailable. New updates will last for this session only.";
+      }
+    }
+
+    function persistPosts() {
+      try {
+        localStorage.setItem(postsStorageKey, JSON.stringify(posts));
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function schoolLabel(schoolId) {
+      if (schoolId === "network") return "School network";
+      const school = schools.find((item) => item.id === schoolId);
+      return school ? school.name : "School network";
+    }
+
+    function renderPosts() {
+      const filteredPosts = posts.filter((post) => activePostFilter === "all" || post.type === activePostFilter).sort((first, second) => second.createdAt - first.createdAt);
+      document.querySelectorAll(".post-filter").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.filter === activePostFilter)));
+      if (!filteredPosts.length) {
+        const filterLabel = activePostFilter === "all" ? "updates" : `${activePostFilter}s`;
+        postFeed.innerHTML = `<div class="post-empty"><strong>No ${escapeHTML(filterLabel)} yet</strong>Add an event, article, or photo to start the school community feed.</div>`;
+        return;
+      }
+      postFeed.innerHTML = filteredPosts.map((post) => {
+        const imageMarkup = post.image ? `<img class="post-image" src="${escapeHTML(post.image)}" alt="${escapeHTML(post.title)}" loading="lazy">` : "";
+        const kindLabel = post.type === "photo" ? "Photo" : post.type === "event" ? "Event" : "Article";
+        return `<article class="post-item${imageMarkup ? " has-image" : ""}" data-post-id="${escapeHTML(post.id)}">${imageMarkup}<div class="post-content"><div class="post-meta"><span class="post-kind">${kindLabel}</span><time datetime="${escapeHTML(post.date)}">${escapeHTML(new Date(`${post.date}T00:00:00`).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" }))}</time></div><h2 class="post-title">${escapeHTML(post.title)}</h2><p class="post-school">${escapeHTML(schoolLabel(post.schoolId))}</p>${post.body ? `<p class="post-body">${escapeHTML(post.body)}</p>` : ""}<button class="post-remove" type="button" data-remove-post="${escapeHTML(post.id)}" aria-label="Remove ${escapeHTML(post.title)}">Remove</button></div></article>`;
+      }).join("");
+    }
+
+    function openPostComposer(type) {
+      const labels = {
+        event: { title: "Add an event", field: "Event name", body: "Event details", action: "Publish event" },
+        article: { title: "Write an article", field: "Article title", body: "Article", action: "Publish article" },
+        photo: { title: "Add photos", field: "Photo caption", body: "Caption or description", action: "Publish photo" }
+      }[type];
+      if (!labels) return;
+      postForm.reset();
+      postForm.elements.type.value = type;
+      document.getElementById("post-dialog-title").textContent = labels.title;
+      document.getElementById("post-title-label").textContent = labels.field;
+      document.getElementById("post-body-label").textContent = labels.body;
+      document.getElementById("save-post").textContent = labels.action;
+      document.getElementById("post-date-label").textContent = type === "event" ? "Event date" : "Date";
+      document.getElementById("post-date").value = new Date().toLocaleDateString("en-CA");
+      document.getElementById("post-body").required = type !== "photo";
+      postImage.required = type === "photo";
+      document.getElementById("post-form-message").textContent = "";
+      postImagePreview.hidden = true;
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = "";
+      postDialog.showModal();
+      document.getElementById("post-title").focus();
+    }
+
+    function resizeImage(file) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.match(/^image\/(jpeg|png|webp)$/)) return reject(new Error("Choose a JPEG, PNG, or WebP image."));
+        if (file.size > 5 * 1024 * 1024) return reject(new Error("Choose an image smaller than 5 MB."));
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("The selected image could not be read."));
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = () => reject(new Error("The selected image could not be opened."));
+          image.onload = () => {
+            const scale = Math.min(1, 1400 / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.78);
+            if (dataUrl.length > 1200000) return reject(new Error("This image is still too large after resizing. Choose a smaller image."));
+            resolve(dataUrl);
+          };
+          image.src = String(reader.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function savePost(event) {
+      event.preventDefault();
+      if (!postForm.reportValidity()) return;
+      const saveButton = document.getElementById("save-post");
+      const formMessage = document.getElementById("post-form-message");
+      saveButton.disabled = true;
+      formMessage.textContent = "";
+      try {
+        const values = new FormData(postForm);
+        const file = postImage.files[0];
+        const type = String(values.get("type"));
+        const image = file ? await resizeImage(file) : "";
+        posts.unshift({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+          type,
+          title: String(values.get("title")).trim(),
+          schoolId: String(values.get("schoolId")),
+          date: String(values.get("date")),
+          body: String(values.get("body") || "").trim(),
+          image,
+          createdAt: Date.now()
+        });
+        const saved = persistPosts();
+        renderPosts();
+        postsStatus.textContent = saved ? "Update published and saved in this browser." : "Update added for this session, but browser storage is full or unavailable.";
+        postDialog.close();
+      } catch (error) {
+        formMessage.textContent = error instanceof Error ? error.message : "The update could not be saved.";
+      } finally {
+        saveButton.disabled = false;
+      }
+    }
+
+    function closePostComposer() {
+      postDialog.close();
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = "";
+      postImagePreview.removeAttribute("src");
+      postImagePreview.hidden = true;
+    }
+
+    function updateNetworkStats(animate = false) {
+      const totals = [
+        [document.getElementById("school-total"), schools.length],
+        [document.getElementById("student-total"), schools.reduce((sum, school) => sum + school.students, 0)],
+        [document.getElementById("staff-total"), schools.reduce((sum, school) => sum + school.staff, 0)]
+      ];
+      const shouldAnimate = animate && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!shouldAnimate) {
+        totals.forEach(([element, target]) => { element.textContent = formatNumber(target); });
+        return;
+      }
+      const start = performance.now();
+      const duration = 720;
+      function tick(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        totals.forEach(([element, target]) => { element.textContent = formatNumber(Math.round(target * eased)); });
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function renderOverview() {
+      regionList.innerHTML = regions.map((region) => {
+        const count = schools.filter((school) => school.region === region).length;
+        return `<button class="region-link" type="button" data-region="${escapeHTML(region)}"><span class="region-name">${escapeHTML(region)}</span><span class="region-count">${count} schools</span><span class="region-arrow" aria-hidden="true">›</span></button>`;
+      }).join("");
+      recentList.innerHTML = schools.slice(0, 4).map((school, index) => `<button class="recent-link" type="button" data-school="${school.id}"><span class="recent-index">0${index + 1}</span><span class="recent-copy"><span class="recent-name">${escapeHTML(school.name)}</span><span class="recent-location">${escapeHTML(school.village)} · ${escapeHTML(school.region)}</span></span></button>`).join("");
+    }
+
+    function setActiveView(view, updateLocation = true) {
+      const views = { home: homeView, schools: schoolsView, updates: updatesView };
+      if (!views[view]) return;
+      activeView = view;
+      Object.entries(views).forEach(([name, element]) => { element.hidden = name !== view; });
+      document.querySelectorAll(".nav-link[data-view]").forEach((link) => {
+        if (link.dataset.view === view) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+      });
+      const activePanel = views[view];
+      activePanel.classList.remove("is-entering");
+      requestAnimationFrame(() => activePanel.classList.add("is-entering"));
+      if (view === "home") updateNetworkStats(true);
+      if (view === "updates") renderPosts();
+      if (updateLocation) history.pushState(null, "", `#${view}`);
+    }
+
+    function renderSchools() {
+      const query = search.value.trim().toLocaleLowerCase();
+      const region = regionFilter.value;
+      const matches = schools.filter((school) => `${school.name} ${school.village} ${school.region}`.toLocaleLowerCase().includes(query) && (!region || school.region === region));
+      rows.innerHTML = matches.map((school) => `<tr tabindex="0" data-id="${school.id}" aria-label="Open ${escapeHTML(school.name)}"><td><span class="school-name">${escapeHTML(school.name)}</span><span class="school-id">${school.id}</span></td><td class="village">${escapeHTML(school.village)}</td><td>${escapeHTML(school.region)}</td><td class="count">${formatNumber(school.students)}</td><td><span class="status">Active</span></td><td class="row-arrow" aria-hidden="true">›</td></tr>`).join("");
+      document.getElementById("result-count").textContent = matches.length ? `(${matches.length})` : "(0)";
+      document.getElementById("footer-count").textContent = `Showing ${matches.length} of ${schools.length} schools`;
+      document.getElementById("empty-state").hidden = matches.length !== 0;
+      document.querySelector("table").hidden = matches.length === 0;
+    }
+
+    function openSchool(id) {
+      const school = schools.find((item) => item.id === id);
+      if (!school) return;
+      currentSchoolId = id;
+      document.getElementById("edit-button").hidden = false;
+      content.innerHTML = `<div class="eyebrow">${school.id} · established ${school.founded}</div><h2 class="detail-title" id="detail-name">${escapeHTML(school.name)}</h2><p class="detail-location">${escapeHTML(school.village)}, ${escapeHTML(school.region)}</p><div class="detail-badges"><span class="badge">Active</span><span class="badge alt">Sample record</span></div><section class="detail-section"><h3>At a glance</h3><div class="detail-grid"><div><span class="field-label">Students enrolled</span><span class="field-value">${formatNumber(school.students)}</span></div><div><span class="field-label">Staff members</span><span class="field-value">${school.staff}</span></div><div><span class="field-label">Village</span><span class="field-value">${escapeHTML(school.village)}</span></div><div><span class="field-label">Region</span><span class="field-value">${escapeHTML(school.region)}</span></div></div></section><section class="detail-section"><h3>Leadership</h3><div class="detail-grid"><div><span class="field-label">${escapeHTML(school.role)}</span><span class="field-value">${escapeHTML(school.leader)}</span></div><div><span class="field-label">School office</span><span class="field-value">${escapeHTML(school.phone)}</span></div></div></section><section class="detail-section"><h3>Contact</h3><div class="detail-grid"><div><span class="field-label">Email</span><span class="field-value">${escapeHTML(school.email)}</span></div><div><span class="field-label">Location</span><span class="field-value">${escapeHTML(school.village)}</span></div></div></section><section class="detail-section"><h3>Notes</h3><p class="detail-note">${escapeHTML(school.note)}</p></section><p class="detail-disclaimer">Fictional preview record. Edits last until refresh. Sign-in and assigned-school permissions are not connected.</p>`;
+      document.body.classList.add("detail-open");
+      panel.setAttribute("aria-hidden", "false");
+      document.getElementById("close-button").focus();
+      history.replaceState(null, "", `#${school.id.toLowerCase()}`);
+    }
+
+    function closeSchool() {
+      document.body.classList.remove("detail-open");
+      panel.setAttribute("aria-hidden", "true");
+      history.replaceState(null, "", location.pathname + location.search);
+    }
+    function editSchool() {
+      const school = schools.find((item) => item.id === currentSchoolId);
+      if (!school) return;
+      document.getElementById("edit-button").hidden = true;
+      content.innerHTML = `<div class="eyebrow">${school.id} · sample record</div><h2 class="detail-title" id="detail-name">Edit school</h2><p class="detail-location">Changes are temporary and reset when this page reloads.</p><form class="edit-form" id="edit-form"><label>School name<input name="name" required maxlength="100" value="${escapeHTML(school.name)}"></label><label>Village<input name="village" required maxlength="80" value="${escapeHTML(school.village)}"></label><div class="detail-grid"><label>Students<input name="students" type="number" min="0" max="100000" required value="${school.students}"></label><label>Staff<input name="staff" type="number" min="0" max="10000" required value="${school.staff}"></label></div><label>School leader<input name="leader" required maxlength="80" value="${escapeHTML(school.leader)}"></label><label>Office phone<input name="phone" type="tel" maxlength="40" value="${escapeHTML(school.phone)}"></label><label>Email<input name="email" type="email" maxlength="120" value="${escapeHTML(school.email)}"></label><label>Notes<textarea name="note" maxlength="500">${escapeHTML(school.note)}</textarea></label><button class="save-button" type="submit">Save sample changes</button></form><p class="detail-disclaimer">Preview only. Do not enter real school or personal information.</p>`;
+      content.querySelector("input[name=name]").focus();
+    }
+    function saveSchool(event) {
+      if (event.target.id !== "edit-form") return;
+      event.preventDefault();
+      if (!event.target.reportValidity()) return;
+      const school = schools.find((item) => item.id === currentSchoolId);
+      if (!school) return;
+      const values = new FormData(event.target);
+      school.name = String(values.get("name")).trim();
+      school.village = String(values.get("village")).trim();
+      school.students = Number(values.get("students"));
+      school.staff = Number(values.get("staff"));
+      school.leader = String(values.get("leader")).trim();
+      school.phone = String(values.get("phone")).trim();
+      school.email = String(values.get("email")).trim();
+      school.note = String(values.get("note")).trim();
+      updateNetworkStats();
+      renderOverview();
+      renderSchools();
+      openSchool(school.id);
+    }
+    document.querySelectorAll(".nav-link[data-view]").forEach((link) => link.addEventListener("click", (event) => {
+      event.preventDefault();
+      setActiveView(link.dataset.view);
+    }));
+    document.querySelectorAll("[data-create-post]").forEach((button) => button.addEventListener("click", () => openPostComposer(button.dataset.createPost)));
+    document.querySelectorAll(".post-filter").forEach((button) => button.addEventListener("click", () => {
+      activePostFilter = button.dataset.filter;
+      renderPosts();
+    }));
+    postImage.addEventListener("change", () => {
+      const file = postImage.files[0];
+      document.getElementById("post-form-message").textContent = "";
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = "";
+      postImagePreview.hidden = true;
+      if (!file) return;
+      if (!file.type.match(/^image\/(jpeg|png|webp)$/) || file.size > 5 * 1024 * 1024) {
+        document.getElementById("post-form-message").textContent = "Choose a JPEG, PNG, or WebP image smaller than 5 MB.";
+        postImage.value = "";
+        return;
+      }
+      imagePreviewUrl = URL.createObjectURL(file);
+      postImagePreview.src = imagePreviewUrl;
+      postImagePreview.hidden = false;
+    });
+    postForm.addEventListener("submit", savePost);
+    document.getElementById("cancel-post").addEventListener("click", closePostComposer);
+    document.getElementById("dismiss-post").addEventListener("click", closePostComposer);
+    postDialog.addEventListener("close", () => {
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = "";
+      postImagePreview.removeAttribute("src");
+      postImagePreview.hidden = true;
+    });
+    postFeed.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-remove-post]");
+      if (!button) return;
+      const post = posts.find((item) => item.id === button.dataset.removePost);
+      if (!post || !window.confirm(`Remove "${post.title}"?`)) return;
+      posts = posts.filter((item) => item.id !== post.id);
+      const saved = persistPosts();
+      renderPosts();
+      postsStatus.textContent = saved ? "Update removed." : "Update removed for this session only; browser storage could not be updated.";
+    });
+    document.getElementById("browse-schools").addEventListener("click", () => setActiveView("schools"));
+    regionList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-region]");
+      if (!button) return;
+      regionFilter.value = button.dataset.region;
+      renderSchools();
+      setActiveView("schools");
+    });
+    recentList.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-school]");
+      if (button) openSchool(button.dataset.school);
+    });
+    rows.addEventListener("click", (event) => { const row = event.target.closest("tr[data-id]"); if (row) openSchool(row.dataset.id); });
+    rows.addEventListener("keydown", (event) => { const row = event.target.closest("tr[data-id]"); if (row && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); openSchool(row.dataset.id); } });
+    search.addEventListener("input", renderSchools);
+    regionFilter.addEventListener("change", renderSchools);
+    document.getElementById("close-button").addEventListener("click", closeSchool);
+    document.getElementById("back-button").addEventListener("click", closeSchool);
+    document.getElementById("backdrop").addEventListener("click", closeSchool);
+    document.getElementById("edit-button").addEventListener("click", editSchool);
+    content.addEventListener("submit", saveSchool);
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && document.body.classList.contains("detail-open")) closeSchool(); });
+    window.addEventListener("popstate", () => {
+      const route = location.hash.slice(1).toLowerCase();
+      if (["schools", "home", "updates"].includes(route)) setActiveView(route, false);
+      else if (route) { setActiveView("schools", false); openSchool(route.toUpperCase()); }
+      else setActiveView("home", false);
+    });
+    loadPosts();
+    if (posts.length) postsStatus.textContent = `${posts.length} update${posts.length === 1 ? "" : "s"} loaded from this browser.`;
+    renderOverview();
+    renderSchools();
+    renderPosts();
+    const initialRoute = location.hash.slice(1).toLowerCase();
+    if (["schools", "home", "updates"].includes(initialRoute)) setActiveView(initialRoute, false);
+    else if (initialRoute) { setActiveView("schools", false); openSchool(initialRoute.toUpperCase()); }
+    else setActiveView("home", false);
+  </script>
+</body>
+</html>
